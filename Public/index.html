@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScrubMe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #faf7f4;
+      --blush: #e8d5cc;
+      --rose: #c9a99a;
+      --deep-rose: #a07060;
+      --sage: #b8c4b8;
+      --charcoal: #2c2825;
+      --warm-gray: #8a7f7a;
+      --white: #ffffff;
+      --shadow: rgba(160, 112, 96, 0.12);
+    }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      background-color: var(--cream);
+      color: var(--charcoal);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 10% 20%, rgba(232, 213, 204, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 80%, rgba(184, 196, 184, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(201, 169, 154, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 32px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .logo-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .logo-line::before,
+    .logo-line::after {
+      content: '';
+      height: 1px;
+      width: 60px;
+      background: linear-gradient(90deg, transparent, var(--rose));
+    }
+    .logo-line::after {
+      background: linear-gradient(90deg, var(--rose), transparent);
+    }
+
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px;
+      font-weight: 300;
+      letter-spacing: 8px;
+      color: var(--charcoal);
+      text-transform: uppercase;
+    }
+
+    .tagline {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+      font-weight: 200;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0 48px;
+    }
+    .divider span {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--rose);
+      opacity: 0.6;
+    }
+    .divider span:nth-child(2) { opacity: 1; background: var(--deep-rose); }
+
+    /* Input section */
+    .input-section {
+      background: var(--white);
+      border-radius: 2px;
+      padding: 32px;
+      box-shadow: 0 2px 40px var(--shadow), 0 1px 0 rgba(255,255,255,0.8) inset;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s 0.1s ease both;
+      border: 1px solid rgba(232, 213, 204, 0.5);
+    }
+
+    .input-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid var(--blush);
+      border-radius: 2px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--charcoal);
+      background: var(--cream);
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"]::placeholder { color: var(--rose); opacity: 0.7; }
+    input[type="text"]:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(201, 169, 154, 0.15);
+    }
+
+    /* Color picker row */
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .color-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+      white-space: nowrap;
+    }
+
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--cream);
+      border: 1px solid var(--blush);
+      border-radius: 2px;
+      padding: 6px 14px 6px 8px;
+      transition: border-color 0.3s;
+      cursor: pointer;
+    }
+
+    .color-picker-wrapper:focus-within {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(201, 169, 154, 0.15);
+    }
+
+    input[type="color"] {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      padding: 0;
+      background: none;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+    .hex-input {
+      width: 90px !important;
+      flex: none !important;
+      padding: 6px 10px !important;
+      font-size: 12px !important;
+      letter-spacing: 1px;
+      font-family: 'Courier New', monospace !important;
+      text-transform: uppercase;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .hex-input:focus { box-shadow: none !important; border: none !important; }
+
+    .color-optional {
+      font-size: 10px;
+      color: var(--rose);
+      opacity: 0.7;
+      letter-spacing: 1px;
+      font-style: italic;
+    }
+
+    /* Color preview swatch inline */
+    .color-swatch {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    /* Color strip on list item */
+    .color-strip {
+      width: 5px;
+      border-radius: 4px;
+      align-self: stretch;
+      flex-shrink: 0;
+      min-height: 32px;
+    }
+
+    .btn-add {
+      padding: 14px 28px;
+      background: var(--charcoal);
+      color: var(--cream);
+      border: none;
+      border-radius: 2px;
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: var(--deep-rose); }
+    .btn-add:active { transform: scale(0.98); }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .list-title {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+    }
+
+    .count-badge {
+      font-size: 11px;
+      color: var(--white);
+      background: var(--rose);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+    }
+
+    #list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .list-item {
+      background: var(--white);
+      border: 1px solid rgba(232, 213, 204, 0.4);
+      border-radius: 2px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 1px 12px var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: slideIn 0.35s ease both;
+    }
+
+    .list-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .item-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      color: var(--rose);
+      min-width: 20px;
+      font-style: italic;
+      flex-shrink: 0;
+    }
+
+    .item-body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+    .item-text {
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      color: var(--charcoal);
+      font-weight: 300;
+    }
+
+    .item-color-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--warm-gray);
+      letter-spacing: 0.5px;
+      font-style: italic;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .list-item:hover .item-actions { opacity: 1; }
+
+    .btn-icon {
+      width: 32px; height: 32px;
+      border: 1px solid var(--blush);
+      border-radius: 2px;
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+    .btn-edit:hover { background: var(--blush); border-color: var(--rose); }
+    .btn-delete:hover { background: #fdecea; border-color: #e8a09a; }
+
+    /* Edit mode */
+    .edit-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .edit-row { display: flex; gap: 10px; align-items: center; }
+
+    .edit-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--rose);
+      border-radius: 2px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--charcoal);
+      background: var(--cream);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(201, 169, 154, 0.1);
+    }
+
+    .edit-color-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-save {
+      padding: 8px 16px;
+      background: var(--deep-rose);
+      color: var(--white);
+      border: none;
+      border-radius: 2px;
+      font-family: 'Jost', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-save:hover { background: var(--charcoal); }
+
+    .btn-cancel {
+      padding: 8px 14px;
+      background: transparent;
+      color: var(--warm-gray);
+      border: 1px solid var(--blush);
+      border-radius: 2px;
+      font-family: 'Jost', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover { border-color: var(--rose); color: var(--deep-rose); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .empty-state .empty-icon { font-size: 28px; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state p {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--warm-gray);
+      font-weight: 300;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 64px;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--rose);
+      opacity: 0.5;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-line">
+        <span class="brand">ScrubMe</span>
+      </div>
+      <p class="tagline">Aesthetic Medicine &amp; Wellness</p>
+      <div class="divider">
+        <span></span><span></span><span></span>
+      </div>
+    </header>
+
+    <div class="input-section">
+      <label class="input-label" for="input">Add new item</label>
+      <div class="input-row">
+        <input id="input" type="text" placeholder="e.g. Top Catarina One Pocket — Talla S Petite…" />
+        <button class="btn-add" onclick="addMessage()">Add</button>
+      </div>
+
+      <div class="color-row">
+        <span class="color-label">Color</span>
+        <div class="color-picker-wrapper">
+          <input type="color" id="colorPicker" value="#00C0B4" oninput="syncHex(this.value)" />
+          <input type="text" class="hex-input" id="hexInput" value="#00C0B4"
+            placeholder="#000000" maxlength="7"
+            oninput="syncPicker(this.value)" />
+        </div>
+        <span class="color-optional">optional</span>
+      </div>
+    </div>
+
+    <div class="list-header">
+      <span class="list-title">Your Collection</span>
+      <span class="count-badge" id="count">0</span>
+    </div>
+
+    <ul id="list"></ul>
+
+    <footer>Est. 2025 &nbsp;·&nbsp; Curated Essentials</footer>
+  </div>
+
+  <script>
+    // Sync color picker ↔ hex input
+    function syncHex(val) {
+      document.getElementById('hexInput').value = val.toUpperCase();
+    }
+
+    function syncPicker(val) {
+      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+        document.getElementById('colorPicker').value = val;
+      }
+    }
+
+    function getSelectedColor() {
+      const hex = document.getElementById('hexInput').value.trim();
+      return /^#[0-9A-Fa-f]{6}$/.test(hex) ? hex : null;
+    }
+
+    function isLight(hex) {
+      const r = parseInt(hex.slice(1,3),16);
+      const g = parseInt(hex.slice(3,5),16);
+      const b = parseInt(hex.slice(5,7),16);
+      return (r * 299 + g * 587 + b * 114) / 1000 > 170;
+    }
+
+    async function loadMessages() {
+      const res = await fetch('/messages');
+      const data = await res.json();
+      document.getElementById('count').textContent = data.length;
+      const list = document.getElementById('list');
+
+      if (data.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">✦</div>
+            <p>Your collection is empty.<br>Add your first item above.</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = data.map((m, i) => {
+        const hasColor = m.color && /^#[0-9A-Fa-f]{6}$/.test(m.color);
+        const colorStrip = hasColor
+          ? `<div class="color-strip" style="background:${m.color}"></div>`
+          : '';
+        const colorLabel = hasColor
+          ? `<span class="item-color-label">
+               <span class="color-swatch" style="background:${m.color}"></span>
+               ${m.color.toUpperCase()}
+             </span>`
+          : '';
+
+        return `
+        <li class="list-item" id="item-${m.id}">
+          ${colorStrip}
+          <span class="item-number">${String(i + 1).padStart(2, '0')}</span>
+          <div class="item-body">
+            <span class="item-text" id="text-${m.id}">${m.text}</span>
+            ${colorLabel}
+          </div>
+          <div class="item-actions">
+            <button class="btn-icon btn-edit" title="Edit"
+              onclick="editMessage(${m.id}, '${m.text.replace(/'/g, "\\'")}', '${m.color || ''}')">✎</button>
+            <button class="btn-icon btn-delete" title="Delete" onclick="deleteMessage(${m.id})">✕</button>
+          </div>
+        </li>`;
+      }).join('');
+    }
+
+    async function addMessage() {
+      const input = document.getElementById('input');
+      const text = input.value.trim();
+      if (!text) return;
+      const color = getSelectedColor();
+      await fetch('/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, color })
+      });
+      input.value = '';
+      loadMessages();
+    }
+
+    function editMessage(id, currentText, currentColor) {
+      const li = document.getElementById(`item-${id}`);
+      const safeColor = /^#[0-9A-Fa-f]{6}$/.test(currentColor) ? currentColor : '#C9A99A';
+      li.innerHTML = `
+        <div class="edit-container">
+          <div class="edit-row">
+            <input class="edit-input" id="edit-input-${id}" value="${currentText}" />
+          </div>
+          <div class="edit-color-row">
+            <span class="color-label" style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--warm-gray);">Color</span>
+            <div class="color-picker-wrapper">
+              <input type="color" id="edit-picker-${id}" value="${safeColor}"
+                oninput="document.getElementById('edit-hex-${id}').value = this.value.toUpperCase()" />
+              <input type="text" class="hex-input" id="edit-hex-${id}" value="${safeColor}"
+                maxlength="7"
+                oninput="if(/^#[0-9A-Fa-f]{6}$/.test(this.value)) document.getElementById('edit-picker-${id}').value=this.value" />
+            </div>
+            <button class="btn-save" onclick="saveMessage(${id})">Save</button>
+            <button class="btn-cancel" onclick="loadMessages()">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.getElementById(`edit-input-${id}`).focus();
+    }
+
+    async function saveMessage(id) {
+      const text = document.getElementById(`edit-input-${id}`).value.trim();
+      const hex = document.getElementById(`edit-hex-${id}`).value.trim();
+      const color = /^#[0-9A-Fa-f]{6}$/.test(hex) ? hex : null;
+      if (!text) return;
+      await fetch(`/messages/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, color })
+      });
+      loadMessages();
+    }
+
+    async function deleteMessage(id) {
+      await fetch(`/messages/${id}`, { method: 'DELETE' });
+      loadMessages();
+    }
+
+    document.getElementById('input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addMessage();
+    });
+
+    loadMessages();
+  </script>
+</body>
+</html>
